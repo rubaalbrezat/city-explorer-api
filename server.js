@@ -8,7 +8,10 @@ const PORT = process.env.PORT;
 const weatherData = require('./data/weather.json');
 
 
+
 server.listen(PORT,()=>console.log("Server is ready!"));
+
+server.use(cors());
 
 
 server.get('/weather',(req,res)=> {
@@ -17,8 +20,14 @@ server.get('/weather',(req,res)=> {
     let inputLat = req.query.lat;
     let inputLon = req.query.lon;
 
-    let result = weatherData.find(item=>inputCityName.toLowerCase() === item.city_name.toLowerCase());
+        
+    if(!inputCityName) {
+        res.status(400).send('Please follow the documentation and fill the requierd feild as the following ?searchQuery=city name');
+    }
 
+    let result = weatherData.find(item=>inputCityName.toLowerCase() === item.city_name.toLowerCase());
+   
+    
     try {
         let filteredData = result.data.map(item=> new ForCast(item));
         res.status(200).send(filteredData);
@@ -27,6 +36,10 @@ server.get('/weather',(req,res)=> {
     }
 
 });
+
+server.get('*',(req,res)=> {
+    res.status(500).send("Not found")
+})
 
 
 class ForCast {
